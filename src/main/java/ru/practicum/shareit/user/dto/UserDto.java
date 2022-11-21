@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,8 +6,6 @@ import ru.practicum.shareit.item.model.Item;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,14 +14,12 @@ import java.util.Map;
  */
 @Data
 @AllArgsConstructor
-public class ItemDto {
-    @PositiveOrZero
+public class UserDto {
     private long id;
-    @Positive
-    private long userId;
-    @NotBlank
+    @NotBlank(message = "Name cannot be empty")
     private String name;
-    @NotBlank
-    private String description;
-    private boolean isAvailable;
+    @NotBlank(message = "Email cannot be empty")
+    @Email(message = "Not valid email")
+    private String email;
+    private final Map<Long, Item> items = new HashMap<>();
 }

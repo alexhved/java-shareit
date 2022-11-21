@@ -1,9 +1,9 @@
 package ru.practicum.shareit.user;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import ru.practicum.shareit.Validator;
+import ru.practicum.shareit.AbstractValidator;
 import ru.practicum.shareit.error.ResourceAlreadyExistException;
 import ru.practicum.shareit.error.ValidateException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -11,19 +11,24 @@ import ru.practicum.shareit.user.model.User;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
-import java.util.ArrayList;
+import javax.validation.Validator;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Validated
-@RequiredArgsConstructor
-public class UserValidatorImpl implements Validator<UserDto> {
-    private final List<String> errorMessages = new ArrayList<>();
+public class UserValidatorImpl extends AbstractValidator<UserDto> {
     private final UserRepository userRepository;
-    private final javax.validation.Validator validator;
+    //private final javax.validation.Validator validator;
     private static final String NAME = "name";
     private static final String EMAIL = "email";
+
+    @Autowired
+    public UserValidatorImpl(Validator validator, UserRepository userRepository /*Validator validator1*/) {
+        super(validator);
+        this.userRepository = userRepository;
+        //this.validator = validator1;
+    }
 
     @Override
     public void validateAllFields(@Valid UserDto userDto) {
@@ -58,7 +63,8 @@ public class UserValidatorImpl implements Validator<UserDto> {
         }
     }
 
-    private void validateField(UserDto userDto, String fieldName) {
+    @Override
+    public void validateField(UserDto userDto, String fieldName) {
         validator.validateProperty(userDto, fieldName).stream()
                 .map(ConstraintViolation::getMessage)
                 .findFirst()

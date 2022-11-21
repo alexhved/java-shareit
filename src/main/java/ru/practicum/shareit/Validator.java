@@ -1,7 +1,6 @@
 package ru.practicum.shareit;
 
 import org.springframework.validation.annotation.Validated;
-import org.springframework.validation.beanvalidation.CustomValidatorBean;
 
 import javax.validation.Valid;
 
@@ -9,4 +8,5 @@ import javax.validation.Valid;
 public interface Validator<T> {
     void validateAllFields(@Valid T t);
     void validateNonNullFields(T t);
+    void validateField(T t, String fieldName);
 }

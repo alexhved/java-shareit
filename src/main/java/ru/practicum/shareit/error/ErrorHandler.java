@@ -26,16 +26,25 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public List<ErrorResponse> validateListHandle(final ValidateException e) {
+        List<String> errorMessages = e.getErrorMessages();
+        errorMessages.forEach(log::warn);
+
+        return errorMessages.stream()
+                .map(ErrorResponse::new)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public List<ErrorResponse> validationListHandle(final ConstraintViolationException e) {
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 
         violations.forEach(violation -> log.warn(violation.getMessage()));
 
-        List<ErrorResponse> errorResponses = violations.stream()
+        return violations.stream()
                 .map(violation -> new ErrorResponse(violation.getMessage()))
                 .collect(Collectors.toUnmodifiableList());
-
-        return errorResponses;
     }
 
     @ExceptionHandler

@@ -1,15 +1,10 @@
 package ru.practicum.shareit;
 
-import org.springframework.validation.annotation.Validated;
-
 import javax.validation.ConstraintViolation;
-import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Validated
-public class AbstractValidator<T> implements Validator<T> {
-    protected final List<String> errorMessages = new ArrayList<>();
+public abstract class AbstractValidator<T> implements Validator<T> {
     protected final javax.validation.Validator validator;
 
     public AbstractValidator(javax.validation.Validator validator) {
@@ -17,20 +12,22 @@ public class AbstractValidator<T> implements Validator<T> {
     }
 
     @Override
-    public void validateAllFields(@Valid T t) {
-
-    }
+    public abstract void validateAllFields(T t);
 
     @Override
-    public void validateNonNullFields(T t) {
-
-    }
+    public abstract void validateNonNullFields(T t);
 
     @Override
-    public void validateField(T t, String fieldName) {
-        validator.validateProperty(t, fieldName).stream()
+    public List<String> getErrorsByField(T t, String fieldName) {
+        return validator.validateProperty(t, fieldName).stream()
                 .map(ConstraintViolation::getMessage)
-                .findFirst()
-                .ifPresent(errorMessages::add);
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
+    public List<String> getErrorsByAllFields(T t) {
+        return validator.validate(t).stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.toUnmodifiableList());
     }
 }

@@ -20,8 +20,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto save(UserDto userDto) {
         userValidator.validateAllFields(userDto);
+
         User newUser = userMapper.mapToUser(userDto);
         User savedUser = userRepository.save(newUser);
+
         return userMapper.mapToUserDto(savedUser);
     }
 
@@ -53,7 +55,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> findAll() {
         List<User> users = userRepository.findAll();
-        List<UserDto> userDtos = users.stream().map(userMapper::mapToUserDto).collect(Collectors.toUnmodifiableList());
-        return userDtos;
+        return users.stream()
+                .map(userMapper::mapToUserDto)
+                .collect(Collectors.toUnmodifiableList());
     }
 }

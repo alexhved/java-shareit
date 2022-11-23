@@ -2,7 +2,6 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.Validator;
 import ru.practicum.shareit.error.ResourceNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -14,8 +13,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final Validator<UserDto> userValidator;
-    private final Mapper userMapper;
+    private final UserValidatorImpl userValidator;
+    private final UserMapper userMapper;
 
     @Override
     public UserDto save(UserDto userDto) {

@@ -2,14 +2,10 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.practicum.shareit.item.model.Item;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Positive;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * TODO Sprint add-controllers.
@@ -17,13 +13,12 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 public class ItemDto {
-    @PositiveOrZero
+    @PositiveOrZero(message = "Id must be positive or zero")
     private long id;
-    @Positive
-    private long userId;
-    @NotBlank
+    @NotBlank(message = "name cannot be empty")
     private String name;
-    @NotBlank
+    @NotBlank(message = "description cannot be empty")
     private String description;
-    private boolean isAvailable;
+    @NotNull(message = "Available must be true or false")
+    private Boolean available;
 }

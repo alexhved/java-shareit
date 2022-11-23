@@ -7,7 +7,7 @@ import ru.practicum.shareit.user.model.User;
 
 @Service
 @RequiredArgsConstructor
-public class UserMapperImpl implements Mapper {
+public class UserMapperImpl implements UserMapper {
 
     @Override
     public User mapToUser(UserDto userDto) {

@@ -3,7 +3,7 @@ package ru.practicum.shareit.user;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-public interface Mapper {
+public interface UserMapper {
 
     User mapToUser(UserDto userDto);
     User mapToUser(UserDto userDto, User user);

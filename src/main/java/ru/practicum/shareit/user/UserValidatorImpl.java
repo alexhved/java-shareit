@@ -2,7 +2,7 @@ package ru.practicum.shareit.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.AbstractValidator;
+import ru.practicum.shareit.utils.AbstractValidator;
 import ru.practicum.shareit.error.ResourceAlreadyExistException;
 import ru.practicum.shareit.error.ValidateException;
 import ru.practicum.shareit.user.dto.UserDto;

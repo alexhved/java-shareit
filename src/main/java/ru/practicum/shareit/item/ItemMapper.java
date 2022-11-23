@@ -7,5 +7,6 @@ public interface ItemMapper {
     Item mapToItem(ItemDto dto);
 
     Item mapToItem(ItemDto dto, Item item, long userId, long itemId);
+
     ItemDto mapToItemDto(Item item);
 }

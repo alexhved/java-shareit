@@ -41,14 +41,14 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse ResourceNotFoundHandle(final ResourceNotFoundException e) {
+    public ErrorResponse resourceNotFoundHandle(final ResourceNotFoundException e) {
         log.warn(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse ResourceAlreadyExistHandle(final ResourceAlreadyExistException e) {
+    public ErrorResponse resourceAlreadyExistHandle(final ResourceAlreadyExistException e) {
         log.warn(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }

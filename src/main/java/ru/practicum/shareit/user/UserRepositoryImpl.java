@@ -9,6 +9,7 @@ import java.util.*;
 public class UserRepositoryImpl implements UserRepository {
     private static final Map<Long, User> userMap = new HashMap<>();
     private static long id = 1;
+
     private static long nextId() {
         return id++;
     }

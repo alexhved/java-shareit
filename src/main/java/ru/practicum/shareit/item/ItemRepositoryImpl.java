@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 public class ItemRepositoryImpl implements ItemRepository {
     private static final Map<Long, List<Item>> itemMap = new HashMap<>();
     private static long id = 1;
+
     private static long genId() {
         return id++;
     }
@@ -108,14 +109,14 @@ public class ItemRepositoryImpl implements ItemRepository {
 
         itemMap.values().stream()
                 .flatMap(Collection::stream)
-                        .forEach(item -> {
-                            if (item.getName().toLowerCase().contains(textSeq) && item.getAvailable().equals(true)) {
-                                result.add(item);
-                            }
-                            if (item.getDescription().toLowerCase().contains(textSeq) && item.getAvailable().equals(true)) {
-                                result.add(item);
-                            }
-                        });
+                .forEach(item -> {
+                    if (item.getName().toLowerCase().contains(textSeq) && item.getAvailable().equals(true)) {
+                        result.add(item);
+                    }
+                    if (item.getDescription().toLowerCase().contains(textSeq) && item.getAvailable().equals(true)) {
+                        result.add(item);
+                    }
+                });
 
         return result.stream().collect(Collectors.toUnmodifiableList());
     }

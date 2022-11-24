@@ -96,7 +96,7 @@ public class ItemRepositoryImpl implements ItemRepository {
             return Collections.emptyList();
         }
 
-        Set<Item> result = new HashSet<>();
+        List<Item> result = new ArrayList<>();
         CharSequence textSeq;
 
         if (text.length() > 4) {
@@ -110,14 +110,12 @@ public class ItemRepositoryImpl implements ItemRepository {
         itemMap.values().stream()
                 .flatMap(Collection::stream)
                 .forEach(item -> {
-                    if (item.getName().toLowerCase().contains(textSeq) && item.getAvailable().equals(true)) {
-                        result.add(item);
-                    }
-                    if (item.getDescription().toLowerCase().contains(textSeq) && item.getAvailable().equals(true)) {
+                    if (item.getName().toLowerCase().contains(textSeq) && item.getAvailable().equals(true)
+                            || item.getDescription().toLowerCase().contains(textSeq) && item.getAvailable().equals(true)) {
                         result.add(item);
                     }
                 });
 
-        return result.stream().collect(Collectors.toUnmodifiableList());
+        return result;
     }
 }

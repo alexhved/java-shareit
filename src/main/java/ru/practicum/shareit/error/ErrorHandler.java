@@ -6,10 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -24,18 +21,6 @@ public class ErrorHandler {
 
         return errorMessages.stream()
                 .map(ErrorResponse::new)
-                .collect(Collectors.toUnmodifiableList());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<ErrorResponse> validationListHandle(final ConstraintViolationException e) {
-        Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
-
-        violations.forEach(violation -> log.warn(violation.getMessage()));
-
-        return violations.stream()
-                .map(violation -> new ErrorResponse(violation.getMessage()))
                 .collect(Collectors.toUnmodifiableList());
     }
 

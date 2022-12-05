@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ItemRepository {
+public interface ItemMemRepository {
      Item save(Item newItem);
 
     Optional<Item> findById(long userId, long itemId);

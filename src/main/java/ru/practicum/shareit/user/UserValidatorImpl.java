@@ -15,14 +15,14 @@ import java.util.Optional;
 
 @Service
 public class UserValidatorImpl extends AbstractValidator<UserDto> {
-    private final UserRepository userRepository;
+    private final UserMemRepository userMemRepository;
     private static final String NAME = "name";
     private static final String EMAIL = "email";
 
     @Autowired
-    public UserValidatorImpl(Validator validator, UserRepository userRepository) {
+    public UserValidatorImpl(Validator validator, UserMemRepository userMemRepository) {
         super(validator);
-        this.userRepository = userRepository;
+        this.userMemRepository = userMemRepository;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class UserValidatorImpl extends AbstractValidator<UserDto> {
     }
 
     private void checkEmailOnDuplicate(String email) {
-        List<User> users = userRepository.findAll();
+        List<User> users = userMemRepository.findAll();
         Optional<String> optEmail = users.stream()
                 .map(User::getEmail)
                 .filter(otherEmail -> otherEmail.equals(email))

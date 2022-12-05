@@ -6,7 +6,7 @@ import ru.practicum.shareit.user.model.User;
 import java.util.*;
 
 @Repository
-public class UserRepositoryImpl implements UserRepository {
+public class UserMemRepositoryImpl implements UserMemRepository {
     private static final Map<Long, User> userMap = new HashMap<>();
     private static long id = 1;
 

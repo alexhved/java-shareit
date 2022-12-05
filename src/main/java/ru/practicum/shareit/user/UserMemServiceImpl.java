@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
-    private final UserRepository userRepository;
+public class UserMemServiceImpl implements UserService {
+    private final UserMemRepository userMemRepository;
     private final UserValidatorImpl userValidator;
     private final UserMapper userMapper;
 
@@ -21,39 +21,39 @@ public class UserServiceImpl implements UserService {
         userValidator.validateAllFields(userDto);
 
         User newUser = userMapper.mapToUser(userDto);
-        User savedUser = userRepository.save(newUser);
+        User savedUser = userMemRepository.save(newUser);
 
         return userMapper.mapToUserDto(savedUser);
     }
 
     @Override
     public UserDto findById(long id) {
-        User user = userRepository.findById(id)
+        User user = userMemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("user with id: %s not found", id)));
         return userMapper.mapToUserDto(user);
     }
 
     @Override
     public UserDto updateById(long userId, UserDto userDto) {
-        User userById = userRepository.findById(userId)
+        User userById = userMemRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("user with id: %s not found", userId)));
 
         userValidator.validateNonNullFields(userDto);
 
         User user = userMapper.mapToUser(userDto, userById);
-        User updatedUser = userRepository.update(userId, user);
+        User updatedUser = userMemRepository.update(userId, user);
 
         return userMapper.mapToUserDto(updatedUser);
     }
 
     @Override
     public void deleteById(long userId) {
-        userRepository.deleteById(userId);
+        userMemRepository.deleteById(userId);
     }
 
     @Override
     public List<UserDto> findAll() {
-        List<User> users = userRepository.findAll();
+        List<User> users = userMemRepository.findAll();
         return users.stream()
                 .map(userMapper::mapToUserDto)
                 .collect(Collectors.toUnmodifiableList());

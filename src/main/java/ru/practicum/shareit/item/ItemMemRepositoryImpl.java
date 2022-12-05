@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
-public class ItemRepositoryImpl implements ItemRepository {
+public class ItemMemRepositoryImpl implements ItemMemRepository {
     private static final Map<Long, List<Item>> itemMap = new HashMap<>();
     private static long id = 1;
 

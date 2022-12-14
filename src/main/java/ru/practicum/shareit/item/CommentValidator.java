@@ -12,7 +12,7 @@ import java.util.List;
 @Component
 public class CommentValidator extends AbstractValidator<CommentRequestDto> {
 
-    private final static String TEXT = "text";
+    private static final String TEXT = "text";
 
     protected CommentValidator(Validator validator) {
         super(validator);

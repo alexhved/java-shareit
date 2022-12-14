@@ -51,7 +51,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<ErrorResponse> ConstraintViolationHandler(final ConstraintViolationException e) {
+    public List<ErrorResponse> constraintViolationHandler(final ConstraintViolationException e) {
         return e.getConstraintViolations().stream()
                 .map(violation -> violation.getPropertyPath().toString())
                 .map(message -> {
@@ -63,7 +63,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse DataIntegrityExceptionHandler(final DataIntegrityViolationException e) {
+    public ErrorResponse cataIntegrityExceptionHandler(final DataIntegrityViolationException e) {
         log.warn(e.getMessage());
         return new ErrorResponse("Insert data error");
     }
@@ -77,7 +77,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse IllegalArgumentExceptionHandler(final IllegalArgumentException e) {
+    public ErrorResponse illegalArgumentExceptionHandler(final IllegalArgumentException e) {
         log.warn(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
@@ -91,7 +91,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse BookingStatusExceptionHandler(final BookingStatusException e) {
+    public ErrorResponse bookingStatusExceptionHandler(final BookingStatusException e) {
         log.warn(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }

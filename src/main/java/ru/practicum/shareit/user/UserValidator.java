@@ -2,11 +2,11 @@ package ru.practicum.shareit.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.utils.AbstractValidator;
 import ru.practicum.shareit.error.ResourceAlreadyExistException;
 import ru.practicum.shareit.error.ValidateException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.utils.AbstractValidator;
 
 import javax.validation.Validator;
 import java.util.ArrayList;
@@ -14,15 +14,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserValidatorImpl extends AbstractValidator<UserDto> {
-    private final UserMemRepository userMemRepository;
+public class UserValidator extends AbstractValidator<UserDto> {
+    private final UserRepository userRepository;
     private static final String NAME = "name";
     private static final String EMAIL = "email";
 
     @Autowired
-    public UserValidatorImpl(Validator validator, UserMemRepository userMemRepository) {
+    public UserValidator(Validator validator, UserRepository userRepository) {
         super(validator);
-        this.userMemRepository = userMemRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -31,7 +31,6 @@ public class UserValidatorImpl extends AbstractValidator<UserDto> {
         if (!errors.isEmpty()) {
             throw new ValidateException(errors);
         }
-        checkEmailOnDuplicate(userDto.getEmail());
     }
 
     @Override
@@ -46,13 +45,10 @@ public class UserValidatorImpl extends AbstractValidator<UserDto> {
         if (!errors.isEmpty()) {
             throw new ValidateException(errors);
         }
-        if (userDto.getEmail() != null) {
-            checkEmailOnDuplicate(userDto.getEmail());
-        }
     }
 
     private void checkEmailOnDuplicate(String email) {
-        List<User> users = userMemRepository.findAll();
+        List<User> users = userRepository.findAll();
         Optional<String> optEmail = users.stream()
                 .map(User::getEmail)
                 .filter(otherEmail -> otherEmail.equals(email))

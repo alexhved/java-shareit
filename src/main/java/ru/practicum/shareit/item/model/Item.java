@@ -1,32 +1,50 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 /**
  * TODO Sprint add-controllers.
  */
-@Getter @Setter @ToString
-@NoArgsConstructor @AllArgsConstructor
 @Builder
+@Getter
+@Setter
+@ToString
 @Entity
-@Table(name = "item", schema = "public")
+@Table(name = "items", schema = "public")
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
-    @Column(name = "user_id")
-    private long userId;
+    @ManyToOne
+    @JoinColumn(name = "owner_id", referencedColumnName = "id")
+    @JsonIgnore
+    private User owner;
     @Column(name = "name")
     private String name;
     @Column(name = "description")
     private String description;
     @Column(name = "available")
     private Boolean available;
+
+    public Item(long id, User owner, String name, String description, Boolean available) {
+        this.id = id;
+        this.owner = owner;
+        this.name = name;
+        this.description = description;
+        this.available = available;
+    }
+
+    public Item() {
+    }
 
     @Override
     public boolean equals(Object o) {

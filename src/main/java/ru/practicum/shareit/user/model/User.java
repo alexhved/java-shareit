@@ -1,21 +1,24 @@
 package ru.practicum.shareit.user.model;
 
-import lombok.*;
 import ru.practicum.shareit.item.model.Item;
 
 import javax.persistence.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 
-@Getter
-@Setter
-@ToString
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "users", schema = "public")
 public class User {
+
+    public User() {
+    }
+
+    public User(long id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -24,8 +27,9 @@ public class User {
     private String name;
     @Column(name = "email", unique = true)
     private String email;
-    @Transient
-    private final Map<Long, Item> items = new HashMap<>();
+
+    @OneToMany(mappedBy = "owner")
+    private List<Item> items;
 
     @Override
     public boolean equals(Object o) {
@@ -38,5 +42,37 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public long getId() {
+        return this.id;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public List<Item> getItems() {
+        return this.items;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setItems(List<Item> items) {
+        this.items = items;
     }
 }

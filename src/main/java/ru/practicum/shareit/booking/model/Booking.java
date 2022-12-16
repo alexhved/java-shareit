@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -17,6 +16,9 @@ import java.util.Objects;
 @Setter
 @Entity
 @Table(name = "bookings")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,21 +38,6 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    public Booking(long id, LocalDateTime start, LocalDateTime end, Item item, User booker, Status status) {
-        this.id = id;
-        this.start = start;
-        this.end = end;
-        this.item = item;
-        this.booker = booker;
-        this.status = status;
-    }
-
-    public Booking() {
-    }
-
-    public static BookingBuilder builder() {
-        return new BookingBuilder();
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -65,53 +52,4 @@ public class Booking {
         return Objects.hash(id);
     }
 
-    public static class BookingBuilder {
-        private long id;
-        private LocalDateTime start;
-        private LocalDateTime end;
-        private Item item;
-        private User booker;
-        private Status status;
-
-        BookingBuilder() {
-        }
-
-        public BookingBuilder id(long id) {
-            this.id = id;
-            return this;
-        }
-
-        public BookingBuilder start(LocalDateTime start) {
-            this.start = start;
-            return this;
-        }
-
-        public BookingBuilder end(LocalDateTime end) {
-            this.end = end;
-            return this;
-        }
-
-        public BookingBuilder item(Item item) {
-            this.item = item;
-            return this;
-        }
-
-        public BookingBuilder booker(User booker) {
-            this.booker = booker;
-            return this;
-        }
-
-        public BookingBuilder status(Status status) {
-            this.status = status;
-            return this;
-        }
-
-        public Booking build() {
-            return new Booking(id, start, end, item, booker, status);
-        }
-
-        public String toString() {
-            return "Booking.BookingBuilder(id=" + this.id + ", start=" + this.start + ", end=" + this.end + ", item=" + this.item + ", booker=" + this.booker + ", status=" + this.status + ")";
-        }
-    }
 }

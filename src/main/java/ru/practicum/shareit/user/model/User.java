@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.model;
 
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.model.Item;
 
 import javax.persistence.*;
@@ -8,16 +9,8 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "users", schema = "public")
+@NoArgsConstructor
 public class User {
-
-    public User() {
-    }
-
-    public User(long id, String name, String email) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,6 +23,12 @@ public class User {
 
     @OneToMany(mappedBy = "owner")
     private List<Item> items;
+
+    public User(long id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
 
     @Override
     public boolean equals(Object o) {

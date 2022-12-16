@@ -42,15 +42,4 @@ public class UserValidator extends AbstractValidator<UserDto> {
         }
     }
 
-    /*private void checkEmailOnDuplicate(String email) {
-        List<User> users = userRepository.findAll();
-        Optional<String> optEmail = users.stream()
-                .map(User::getEmail)
-                .filter(otherEmail -> otherEmail.equals(email))
-                .findFirst();
-
-        if (optEmail.isPresent() && optEmail.get().equals(email)) {
-            throw new ResourceAlreadyExistException(String.format("email: %s already exist", email));
-        }
-    }*/
 }

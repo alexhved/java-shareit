@@ -1,6 +1,6 @@
 package ru.practicum.shareit.user;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.error.ResourceNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -10,11 +10,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
     private final UserRepository userRepository;
-    private final UserValidatorImpl userValidator;
+    private final UserValidator userValidator;
     private final UserMapper userMapper;
+
+    @Autowired
+    public UserServiceImpl(UserRepository userRepository, UserValidator userValidator, UserMapper userMapper) {
+        this.userRepository = userRepository;
+        this.userValidator = userValidator;
+        this.userMapper = userMapper;
+    }
 
     @Override
     public UserDto save(UserDto userDto) {
@@ -35,13 +42,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateById(long userId, UserDto userDto) {
-        User userById = userRepository.findById(userId)
+        User userFromDB = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("user with id: %s not found", userId)));
 
         userValidator.validateNonNullFields(userDto);
 
-        User user = userMapper.mapToUser(userDto, userById);
-        User updatedUser = userRepository.update(userId, user);
+        User user = userMapper.mapToUser(userDto, userFromDB);
+        User updatedUser = userRepository.save(user);
 
         return userMapper.mapToUserDto(updatedUser);
     }

@@ -1,13 +1,23 @@
 package ru.practicum.shareit.user;
 
+import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-public interface UserMapper {
+@Service
+public class UserMapper {
 
-    User mapToUser(UserDto userDto);
+    public User mapToUser(UserDto userDto) {
+        return new User(userDto.getId(), userDto.getName(), userDto.getEmail());
+    }
 
-    User mapToUser(UserDto userDto, User user);
+    public User mapToUser(UserDto userDto, User user) {
+        return new User(user.getId(),
+                userDto.getName() != null ? userDto.getName() : user.getName(),
+                userDto.getEmail() != null ? userDto.getEmail() : user.getEmail());
+    }
 
-    UserDto mapToUserDto(User user);
+    public UserDto mapToUserDto(User user) {
+        return new UserDto(user.getId(), user.getName(), user.getEmail());
+    }
 }

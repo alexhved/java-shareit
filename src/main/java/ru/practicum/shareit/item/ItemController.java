@@ -2,8 +2,10 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.dto.CommentRequestDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
+import ru.practicum.shareit.item.dto.ItemRequestDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 
 import java.util.List;
 
@@ -17,32 +19,41 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto save(@RequestHeader("X-Sharer-User-Id") long userId,
-                        @RequestBody ItemDto itemDto) {
-        return itemService.save(userId, itemDto);
+    public ItemResponseDto save(@RequestHeader("X-Sharer-User-Id") long userId,
+                                @RequestBody ItemRequestDto itemRequestDto) {
+        return itemService.save(userId, itemRequestDto);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestHeader("X-Sharer-User-Id") long userId,
-                          @PathVariable long itemId,
-                          @RequestBody ItemDto itemDto) {
-        return itemService.update(userId, itemId, itemDto);
+    public ItemResponseDto update(@RequestHeader("X-Sharer-User-Id") long userId,
+                                  @PathVariable long itemId,
+                                  @RequestBody ItemRequestDto itemRequestDto) {
+        return itemService.update(userId, itemId, itemRequestDto);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto findById(@RequestHeader("X-Sharer-User-Id") long userId,
-                            @PathVariable long itemId) {
-        return itemService.findById(itemId);
+    public ItemResponseDto findById(@RequestHeader("X-Sharer-User-Id") long userId,
+                                    @PathVariable long itemId) {
+        return itemService.findById(userId, itemId);
     }
 
     @GetMapping
-    public List<Item> findAllByUserId(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemResponseDto> findAllByUserId(@RequestHeader("X-Sharer-User-Id") long userId) {
         return itemService.findAllByUserId(userId);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                              @RequestParam(required = false, defaultValue = "") String text) {
+    public List<ItemResponseDto> searchItem(@RequestHeader("X-Sharer-User-Id") long userId,
+                                            @RequestParam(required = false, defaultValue = "") String text) {
+
         return itemService.searchItem(userId, text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentResponseDto addComment(@RequestHeader("X-Sharer-User-Id") long userId,
+                                         @PathVariable long itemId,
+                                         @RequestBody CommentRequestDto commentRequestDto) {
+
+        return itemService.addComment(userId, itemId, commentRequestDto);
     }
 }

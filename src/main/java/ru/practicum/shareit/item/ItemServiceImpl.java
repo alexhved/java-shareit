@@ -2,11 +2,14 @@ package ru.practicum.shareit.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.Status;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.ShortBooking;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.error.ResourceNotFoundException;
 import ru.practicum.shareit.item.dto.CommentRequestDto;
 import ru.practicum.shareit.item.dto.CommentResponseDto;
@@ -14,6 +17,8 @@ import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -31,6 +36,7 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final RequestRepository requestRepository;
     private final ItemValidator itemValidator;
     private final CommentValidator commentValidator;
     private final ItemMapper itemMapper;
@@ -41,6 +47,7 @@ public class ItemServiceImpl implements ItemService {
                            ItemRepository itemRepository,
                            BookingRepository bookingRepository,
                            CommentRepository commentRepository,
+                           RequestRepository requestRepository,
                            ItemValidator itemValidator,
                            CommentValidator commentValidator,
                            ItemMapper itemMapper,
@@ -49,6 +56,7 @@ public class ItemServiceImpl implements ItemService {
         this.itemRepository = itemRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.requestRepository = requestRepository;
         this.itemValidator = itemValidator;
         this.commentValidator = commentValidator;
         this.itemMapper = itemMapper;
@@ -62,8 +70,14 @@ public class ItemServiceImpl implements ItemService {
 
         itemValidator.validateAllFields(itemRequestDto);
 
+        Long requestId = itemRequestDto.getRequestId();
+        Optional<ItemRequest> itemRequest = Optional.empty();
 
-        Item newItem = itemMapper.mapToItem(itemRequestDto, user);
+        if (requestId != null) {
+            itemRequest = requestRepository.findById(requestId);
+        }
+
+        Item newItem = itemMapper.mapToItem(itemRequestDto, user, itemRequest);
         Item savedItem = itemRepository.save(newItem);
 
         return itemMapper.mapToItemResponseDto(savedItem);
@@ -120,11 +134,23 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemResponseDto> findAllByUserId(long userId) {
+    public List<ItemResponseDto> findAllByUserId(long userId, Integer from, Integer size) {
         if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException(String.format("User with id %s not found", userId));
         }
-        List<Item> items = itemRepository.findAllByOwnerIdOrderByIdAsc(userId);
+
+        Pageable pageable;
+        if (from == null || size == null) {
+            pageable = Pageable.unpaged();
+        } else {
+            if (from < 0 || size < 1) {
+                throw new IllegalArgumentException("Illegal pageable argument");
+            }
+            pageable = PageRequest.of(from, size);
+        }
+
+        Page<Item> itemsPage = itemRepository.findAllByOwnerIdOrderByIdAsc(userId, pageable);
+        List<Item> items = itemsPage.getContent();
 
         List<Long> itemsIds = items.stream()
                 .map(Item::getId)
@@ -171,7 +197,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemResponseDto> searchItem(long userId, String text) {
+    public List<ItemResponseDto> searchItem(long userId, String text, Integer from, Integer size) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid User id"));
 
@@ -190,8 +216,19 @@ public class ItemServiceImpl implements ItemService {
         }
         String searchValue = String.valueOf(textSeq);
 
-        List<Item> result = itemRepository
-                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(searchValue, searchValue);
+        Pageable pageable;
+        if (from == null || size == null) {
+            pageable = Pageable.unpaged();
+        } else {
+            if (from < 0 || size < 1) {
+                throw new IllegalArgumentException("Illegal pageable argument");
+            }
+            pageable = PageRequest.of(from, size);
+        }
+
+        Page<Item> page = itemRepository
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(searchValue, searchValue, pageable);
+        List<Item> result = page.getContent();
 
         return result.stream()
                 .map(itemMapper::mapToItemResponseDto)

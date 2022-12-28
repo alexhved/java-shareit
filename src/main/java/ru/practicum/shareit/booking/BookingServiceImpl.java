@@ -1,6 +1,9 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
@@ -104,20 +107,31 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseDto> findAllByBookerIdAndState(Long userId, String state) {
+    public List<BookingResponseDto> findAllByBookerIdAndState(Long userId, String state, Integer from, Integer size) {
         if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException(String.format("User with id %s not found", userId));
         }
 
-        List<Booking> bookingsByState = getBookingsByBookerAndState(userId, state);
+        Pageable pageable;
+        if (from == null || size == null) {
+            pageable = Pageable.unpaged();
+        } else {
+            if (from < 0 || size < 1) {
+                throw new IllegalArgumentException("Illegal pageable argument");
+            }
+            pageable = PageRequest.of((from / size), size);
+        }
 
-        return bookingsByState.stream()
+        Page<Booking> bookingPage = getPageableBookingsByBookerAndState(userId, state, pageable);
+        List<Booking> bookings = bookingPage.getContent();
+
+        return bookings.stream()
                 .map(bookingMapper::mapToResponseDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<BookingResponseDto> findAllByOwnerIdAndState(Long userId, String state) {
+    public List<BookingResponseDto> findAllByOwnerIdAndState(Long userId, String state, Integer from, Integer size) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("User with id %s not found", userId)));
 
@@ -129,78 +143,88 @@ public class BookingServiceImpl implements BookingService {
                 .map(Item::getId)
                 .collect(Collectors.toList());
 
-        List<Booking> bookingsByState = getBookingsByOwnerAndState(state, itemsIds);
+        Pageable pageable;
+        if (from == null || size == null) {
+            pageable = Pageable.unpaged();
+        } else {
+            if (from < 0 || size < 1) {
+                throw new IllegalArgumentException("Illegal pageable argument");
+            }
+            pageable = PageRequest.of((from / size), size);
+        }
+
+        Page<Booking> bookingsByState = getBookingsByOwnerAndState(state, itemsIds, pageable);
 
         return bookingsByState.stream()
                 .map(bookingMapper::mapToResponseDto)
                 .collect(Collectors.toList());
     }
 
-    private List<Booking> getBookingsByOwnerAndState(String state, List<Long> itemsIds) {
+    private Page<Booking> getPageableBookingsByBookerAndState(Long userId, String state, Pageable page) {
 
         State enumState = Arrays.stream(State.values())
                 .filter(value -> value.name().equals(state))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown state: %s", state)));
 
-        List<Booking> bookingsByState;
+        Page<Booking> bookingsByState;
 
         switch (enumState) {
             case ALL:
-                bookingsByState = bookingRepository.findByItemsAndStateAll(itemsIds);
+                bookingsByState = bookingRepository.findByBookerIdOrderByStartDesc(userId, page);
                 break;
             case PAST:
-                bookingsByState = bookingRepository.findByItemsAndStatePast(itemsIds);
+                bookingsByState = bookingRepository.findByBookerAndStatePast(userId, page);
                 break;
             case CURRENT:
-                bookingsByState = bookingRepository.findByItemsAndStateCurrent(itemsIds);
+                bookingsByState = bookingRepository.findByBookerIdAndCurrent(userId, page);
                 break;
             case FUTURE:
-                bookingsByState = bookingRepository.findByItemsAndStateFuture(itemsIds);
+                bookingsByState = bookingRepository.findByBookerAndStateFuture(userId, page);
                 break;
             case WAITING:
-                bookingsByState = bookingRepository.findByItemsAndState(itemsIds, Status.WAITING);
+                bookingsByState = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING, page);
                 break;
             case REJECTED:
-                bookingsByState = bookingRepository.findByItemsAndState(itemsIds, Status.REJECTED);
+                bookingsByState = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED, page);
                 break;
             default:
-                bookingsByState = Collections.emptyList();
+                bookingsByState = null;
                 break;
         }
         return bookingsByState;
     }
 
-    private List<Booking> getBookingsByBookerAndState(Long userId, String state) {
+    private Page<Booking> getBookingsByOwnerAndState(String state, List<Long> itemsIds, Pageable page) {
 
         State enumState = Arrays.stream(State.values())
                 .filter(value -> value.name().equals(state))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown state: %s", state)));
 
-        List<Booking> bookingsByState;
+        Page<Booking> bookingsByState;
 
         switch (enumState) {
             case ALL:
-                bookingsByState = bookingRepository.findByBookerIdOrderByStartDesc(userId);
+                bookingsByState = bookingRepository.findByItemsAndStateAll(itemsIds, page);
                 break;
             case PAST:
-                bookingsByState = bookingRepository.findByBookerAndStatePast(userId);
+                bookingsByState = bookingRepository.findByItemsAndStatePast(itemsIds, page);
                 break;
             case CURRENT:
-                bookingsByState = bookingRepository.findByBookerIdAndCurrent(userId);
+                bookingsByState = bookingRepository.findByItemsAndStateCurrent(itemsIds, page);
                 break;
             case FUTURE:
-                bookingsByState = bookingRepository.findByBookerAndStateFuture(userId);
+                bookingsByState = bookingRepository.findByItemsAndStateFuture(itemsIds, page);
                 break;
             case WAITING:
-                bookingsByState = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING);
+                bookingsByState = bookingRepository.findByItemsAndState(itemsIds, Status.WAITING, page);
                 break;
             case REJECTED:
-                bookingsByState = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
+                bookingsByState = bookingRepository.findByItemsAndState(itemsIds, Status.REJECTED, page);
                 break;
             default:
-                bookingsByState = Collections.emptyList();
+                bookingsByState = null;
                 break;
         }
         return bookingsByState;

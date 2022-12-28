@@ -38,15 +38,19 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemResponseDto> findAllByUserId(@RequestHeader("X-Sharer-User-Id") long userId) {
-        return itemService.findAllByUserId(userId);
+    public List<ItemResponseDto> findAllByUserId(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                 @RequestParam(required = false) Integer from,
+                                                 @RequestParam(required = false) Integer size) {
+        return itemService.findAllByUserId(userId, from, size);
     }
 
     @GetMapping("/search")
     public List<ItemResponseDto> searchItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                                            @RequestParam(required = false, defaultValue = "") String text) {
+                                            @RequestParam(required = false, defaultValue = "") String text,
+                                            @RequestParam(required = false) Integer from,
+                                            @RequestParam(required = false) Integer size) {
 
-        return itemService.searchItem(userId, text);
+        return itemService.searchItem(userId, text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

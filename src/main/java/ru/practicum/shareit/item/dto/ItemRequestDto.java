@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -23,4 +24,6 @@ public class ItemRequestDto {
     private String description;
     @NotNull(message = "Available must be true or false")
     private Boolean available;
+    @Nullable
+    private Long requestId;
 }

@@ -69,13 +69,6 @@
 			<artifactId>mapstruct-processor</artifactId>
 			<version>1.5.3.Final</version>
 		</dependency>
-		<!--<dependency>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-compiler-plugin</artifactId>
-			<version>3.10.1</version>
-			<type>maven-plugin</type>
-		</dependency>-->
-
 
 	</dependencies>
 
@@ -197,9 +190,9 @@
 								<goal>check</goal>
 							</goals>
 							<configuration>
-								<excludes>
+								<!--<excludes>
 									<exclude>**/*MapperImpl.*</exclude>
-								</excludes>
+								</excludes>-->
 								<rules>
 									<rule>
 										<element>BUNDLE</element>

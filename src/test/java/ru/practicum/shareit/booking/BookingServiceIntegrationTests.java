@@ -16,6 +16,8 @@ import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @Transactional
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -253,5 +255,34 @@ public class BookingServiceIntegrationTests {
                 .hasFieldOrPropertyWithValue("start", booking.getStart())
                 .hasFieldOrPropertyWithValue("end", booking.getEnd())
                 .hasFieldOrPropertyWithValue("status", booking.getStatus());
+    }
+
+    @Test
+    void findAllByOwnerIdAndState_shouldReturnUnpaged() {
+        booking.setStatus(Status.REJECTED);
+        user.setItems(List.of(item));
+        entityManager.persist(user);
+        entityManager.persist(item);
+        entityManager.persist(booking);
+
+        List<BookingResponseDto> dtoList = bookingService.findAllByOwnerIdAndState(user.getId(), "REJECTED", null, null);
+
+        Assertions.assertThat(dtoList).isNotEmpty();
+        Assertions.assertThat(dtoList.get(0))
+                .hasFieldOrPropertyWithValue("start", booking.getStart())
+                .hasFieldOrPropertyWithValue("end", booking.getEnd())
+                .hasFieldOrPropertyWithValue("status", booking.getStatus());
+    }
+
+    @Test
+    void findAllByOwnerIdAndState_shouldThrowIllegalArgumentEx() {
+        booking.setStatus(Status.REJECTED);
+        user.setItems(List.of(item));
+        entityManager.persist(user);
+        entityManager.persist(item);
+        entityManager.persist(booking);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> bookingService.findAllByOwnerIdAndState(user.getId(), "REJECTED", -1, 1));
     }
 }

@@ -9,9 +9,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.ResourceAccessException;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.error.BookingStatusException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
@@ -82,6 +84,27 @@ class BookingServiceImplTest {
         verify(validator, times(1)).validateNonNullFields(bookingRequestDto);
     }
 
+
+    @Test
+    void create_shouldThrowResourceAccessEx() {
+        item.setOwner(user);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+        assertThrows(ResourceAccessException.class, () -> bookingService.create(userId, bookingRequestDto));
+    }
+
+    @Test
+    void create_shouldThrowIllegalArgumentEx() {
+        item.setAvailable(false);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+        assertThrows(IllegalArgumentException.class, () -> bookingService.create(userId, bookingRequestDto));
+    }
+
     @Test
     void approve_shouldApprove() {
         item.setOwner(user);
@@ -92,6 +115,35 @@ class BookingServiceImplTest {
         BookingResponseDto approved = bookingService.approve(userId, bookingId, true);
 
         assertEquals(Status.APPROVED, approved.getStatus());
+    }
+
+    @Test
+    void approve_shouldReject() {
+        item.setOwner(user);
+
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.ofNullable(booking));
+        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
+
+        BookingResponseDto approved = bookingService.approve(userId, bookingId, false);
+
+        assertEquals(Status.REJECTED, approved.getStatus());
+    }
+
+    @Test
+    void approve_shouldThrowResourceAccessEx() {
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.ofNullable(booking));
+
+        assertThrows(ResourceAccessException.class, () -> bookingService.approve(userId, bookingId, true));
+    }
+
+    @Test
+    void approve_shouldThrowBookingStatusEx() {
+        item.setOwner(user);
+        booking.setStatus(Status.APPROVED);
+
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.ofNullable(booking));
+
+        assertThrows(BookingStatusException.class, () -> bookingService.approve(userId, bookingId, true));
     }
 
     @Test
@@ -110,6 +162,14 @@ class BookingServiceImplTest {
         BookingResponseDto dto = bookingService.getByBookerOrOwner(userId2, bookingId);
 
         assertEquals(userId, dto.getBooker().getId());
+    }
+
+    @Test
+    void getByBookerOrOwner_shouldThrowResourceAccessEx() {
+        item.setOwner(user);
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.ofNullable(booking));
+
+        assertThrows(ResourceAccessException.class, () -> bookingService.getByBookerOrOwner(userId2, bookingId));
     }
 
     @Test

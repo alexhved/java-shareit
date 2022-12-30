@@ -23,10 +23,7 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -160,6 +157,33 @@ public class ItemServiceImpl implements ItemService {
         List<Booking> lastBookings = bookingRepository.getLastBookings(itemsIds);
         List<Booking> nextBookings = bookingRepository.getNextBookings(itemsIds);
 
+        Map<Long, List<Comment>> itemComments = new HashMap<>();
+        Map<Long, List<Booking>> itemLastBookings = new HashMap<>();
+        Map<Long, List<Booking>> itemNextBookings = new HashMap<>();
+
+        for (Long itemId : itemsIds) {
+            List<Comment> commentsForItem = comments.stream()
+                    .filter(comment -> itemId.equals(comment.getId()))
+                    .collect(Collectors.toList());
+            if (!commentsForItem.isEmpty()) {
+                itemComments.put(itemId, commentsForItem);
+            }
+
+            List<Booking> lastBookingsForItem = lastBookings.stream()
+                    .filter(booking -> userId == booking.getBooker().getId())
+                    .collect(Collectors.toList());
+            if(!lastBookingsForItem.isEmpty()) {
+                itemLastBookings.put(itemId, lastBookingsForItem);
+            }
+
+            List<Booking> nextBookingsForItem = nextBookings.stream()
+                    .filter(booking -> userId == booking.getBooker().getId())
+                    .collect(Collectors.toList());
+            if (!nextBookingsForItem.isEmpty()) {
+                itemNextBookings.put(itemId, nextBookingsForItem);
+            }
+        }
+
         List<ItemResponseDto> responseDtoList = new ArrayList<>();
 
         for (Item item : items) {
@@ -167,32 +191,34 @@ public class ItemServiceImpl implements ItemService {
             List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
 
             if (!comments.isEmpty()) {
-                for (Comment comment : comments) {
-                    if (comment.getItem().getId() == item.getId()) {
-                        commentResponseDtoList.add(commentMapper.mapToCommentResponseDto(comment));
+                itemComments.forEach((key, value) -> {
+                    if (item.getId() == key) {
+                        List<CommentResponseDto> dtoList = value.stream()
+                                .map(commentMapper::mapToCommentResponseDto)
+                                .collect(Collectors.toList());
+                        commentResponseDtoList.addAll(dtoList);
                     }
-                }
+                });
             }
 
             if (!lastBookings.isEmpty()) {
-                for (Booking last : lastBookings) {
-                    if (last.getItem().getId() == item.getId()) {
-                        itemResponseDto.setLastBooking(new ShortBooking(last.getId(), last.getBooker().getId()));
+                itemLastBookings.forEach((key, value) -> {
+                    if (key == item.getId()) {
+                        itemResponseDto.setLastBooking(new ShortBooking(value.get(0).getId(), key));
                     }
-                }
+                });
             }
 
             if (!nextBookings.isEmpty()) {
-                for (Booking next : nextBookings) {
-                    if (next.getItem().getId() == item.getId()) {
-                        itemResponseDto.setNextBooking(new ShortBooking(next.getId(), next.getBooker().getId()));
+                itemNextBookings.forEach((key, value) -> {
+                    if (key == item.getId()) {
+                        itemResponseDto.setLastBooking(new ShortBooking(value.get(0).getId(), key));
                     }
-                }
+                });
             }
             itemResponseDto.setComments(commentResponseDtoList);
             responseDtoList.add(itemResponseDto);
         }
-
         return responseDtoList;
     }
 
@@ -206,14 +232,17 @@ public class ItemServiceImpl implements ItemService {
         }
 
         CharSequence textSeq;
+        byte garbageLetters;
 
         if (text.length() > 4) {
-            textSeq = text.toLowerCase().subSequence(0, text.length() - 2);
+            garbageLetters = 2;
         } else if (text.length() > 3) {
-            textSeq = text.toLowerCase().subSequence(0, text.length() - 1);
+            garbageLetters = 1;
         } else {
-            textSeq = text.toLowerCase().subSequence(0, text.length());
+            garbageLetters = 0;
         }
+
+        textSeq = text.toLowerCase().subSequence(0, text.length() - garbageLetters);
         String searchValue = String.valueOf(textSeq);
 
         Pageable pageable;

@@ -1,6 +1,6 @@
 package ru.practicum.shareit.request;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,18 +19,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
     private final RequestMapper requestMapper;
-
-    @Autowired
-    public RequestServiceImpl(UserRepository userRepository, RequestRepository requestRepository,
-                              RequestMapper requestMapper) {
-        this.userRepository = userRepository;
-        this.requestRepository = requestRepository;
-        this.requestMapper = requestMapper;
-    }
 
     @Override
     public ResponseDto create(Long userId, RequestDto requestDto) {

@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,8 +16,8 @@ import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.RequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -27,7 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@Primary
+@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
@@ -39,26 +38,6 @@ public class ItemServiceImpl implements ItemService {
     private final ItemMapper itemMapper;
     private final CommentMapper commentMapper;
 
-    @Autowired
-    public ItemServiceImpl(UserRepository userRepository,
-                           ItemRepository itemRepository,
-                           BookingRepository bookingRepository,
-                           CommentRepository commentRepository,
-                           RequestRepository requestRepository,
-                           ItemValidator itemValidator,
-                           CommentValidator commentValidator,
-                           ItemMapper itemMapper,
-                           CommentMapper commentMapper) {
-        this.userRepository = userRepository;
-        this.itemRepository = itemRepository;
-        this.bookingRepository = bookingRepository;
-        this.commentRepository = commentRepository;
-        this.requestRepository = requestRepository;
-        this.itemValidator = itemValidator;
-        this.commentValidator = commentValidator;
-        this.itemMapper = itemMapper;
-        this.commentMapper = commentMapper;
-    }
 
     @Override
     public ItemResponseDto save(long userId, ItemRequestDto itemRequestDto) {
@@ -157,69 +136,7 @@ public class ItemServiceImpl implements ItemService {
         List<Booking> lastBookings = bookingRepository.getLastBookings(itemsIds);
         List<Booking> nextBookings = bookingRepository.getNextBookings(itemsIds);
 
-        Map<Long, List<Comment>> itemComments = new HashMap<>();
-        Map<Long, List<Booking>> itemLastBookings = new HashMap<>();
-        Map<Long, List<Booking>> itemNextBookings = new HashMap<>();
-
-        for (Long itemId : itemsIds) {
-            List<Comment> commentsForItem = comments.stream()
-                    .filter(comment -> itemId.equals(comment.getId()))
-                    .collect(Collectors.toList());
-            if (!commentsForItem.isEmpty()) {
-                itemComments.put(itemId, commentsForItem);
-            }
-
-            List<Booking> lastBookingsForItem = lastBookings.stream()
-                    .filter(booking -> userId == booking.getBooker().getId())
-                    .collect(Collectors.toList());
-            if(!lastBookingsForItem.isEmpty()) {
-                itemLastBookings.put(itemId, lastBookingsForItem);
-            }
-
-            List<Booking> nextBookingsForItem = nextBookings.stream()
-                    .filter(booking -> userId == booking.getBooker().getId())
-                    .collect(Collectors.toList());
-            if (!nextBookingsForItem.isEmpty()) {
-                itemNextBookings.put(itemId, nextBookingsForItem);
-            }
-        }
-
-        List<ItemResponseDto> responseDtoList = new ArrayList<>();
-
-        for (Item item : items) {
-            ItemResponseDto itemResponseDto = itemMapper.mapToItemResponseDto(item);
-            List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
-
-            if (!comments.isEmpty()) {
-                itemComments.forEach((key, value) -> {
-                    if (item.getId() == key) {
-                        List<CommentResponseDto> dtoList = value.stream()
-                                .map(commentMapper::mapToCommentResponseDto)
-                                .collect(Collectors.toList());
-                        commentResponseDtoList.addAll(dtoList);
-                    }
-                });
-            }
-
-            if (!lastBookings.isEmpty()) {
-                itemLastBookings.forEach((key, value) -> {
-                    if (key == item.getId()) {
-                        itemResponseDto.setLastBooking(new ShortBooking(value.get(0).getId(), key));
-                    }
-                });
-            }
-
-            if (!nextBookings.isEmpty()) {
-                itemNextBookings.forEach((key, value) -> {
-                    if (key == item.getId()) {
-                        itemResponseDto.setLastBooking(new ShortBooking(value.get(0).getId(), key));
-                    }
-                });
-            }
-            itemResponseDto.setComments(commentResponseDtoList);
-            responseDtoList.add(itemResponseDto);
-        }
-        return responseDtoList;
+        return mapToDtoList(itemsIds, items, comments, lastBookings, nextBookings);
     }
 
     @Override
@@ -284,5 +201,67 @@ public class ItemServiceImpl implements ItemService {
         Comment savedComment = commentRepository.save(newComment);
 
         return commentMapper.mapToCommentResponseDto(savedComment);
+    }
+
+    private List<ItemResponseDto> mapToDtoList(List<Long> itemsIds,
+                                               List<Item> items,
+                                               List<Comment> comments,
+                                               List<Booking> lastBookings,
+                                               List<Booking> nextBookings) {
+
+        Map<Long, List<Comment>> itemComments = new HashMap<>();
+        Map<Long, List<Booking>> itemLastBookings = new HashMap<>();
+        Map<Long, List<Booking>> itemNextBookings = new HashMap<>();
+
+        for (Long itemId : itemsIds) {
+            List<Comment> commentsForItem = comments.stream()
+                    .filter(comment -> itemId.equals(comment.getItem().getId()))
+                    .collect(Collectors.toList());
+            if (!commentsForItem.isEmpty()) {
+                itemComments.put(itemId, commentsForItem);
+            }
+
+            List<Booking> lastBookingsForItem = lastBookings.stream()
+                    .filter(booking -> itemId == booking.getItem().getId())
+                    .collect(Collectors.toList());
+            if (!lastBookingsForItem.isEmpty()) {
+                itemLastBookings.put(itemId, lastBookingsForItem);
+            }
+
+            List<Booking> nextBookingsForItem = nextBookings.stream()
+                    .filter(booking -> itemId == booking.getItem().getId())
+                    .collect(Collectors.toList());
+            if (!nextBookingsForItem.isEmpty()) {
+                itemNextBookings.put(itemId, nextBookingsForItem);
+            }
+        }
+
+        List<ItemResponseDto> responseDtoList = new ArrayList<>();
+
+        for (Item item : items) {
+            ItemResponseDto itemResponseDto = itemMapper.mapToItemResponseDto(item);
+            List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
+
+            if (!comments.isEmpty() && itemComments.containsKey(item.getId())) {
+                List<Comment> commentList = itemComments.get(item.getId());
+                List<CommentResponseDto> dtoList = commentList.stream()
+                        .map(commentMapper::mapToCommentResponseDto)
+                        .collect(Collectors.toList());
+                commentResponseDtoList.addAll(dtoList);
+            }
+
+            if (!lastBookings.isEmpty() && itemLastBookings.containsKey(item.getId())) {
+                Booking booking = itemLastBookings.get(item.getId()).get(0);
+                itemResponseDto.setLastBooking(new ShortBooking(booking.getId(), booking.getBooker().getId()));
+            }
+
+            if (!nextBookings.isEmpty() && itemNextBookings.containsKey(item.getId())) {
+                Booking booking = itemNextBookings.get(item.getId()).get(0);
+                itemResponseDto.setNextBooking(new ShortBooking(booking.getId(), booking.getBooker().getId()));
+            }
+            itemResponseDto.setComments(commentResponseDtoList);
+            responseDtoList.add(itemResponseDto);
+        }
+        return responseDtoList;
     }
 }

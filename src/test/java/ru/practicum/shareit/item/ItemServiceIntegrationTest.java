@@ -28,7 +28,7 @@ public class ItemServiceIntegrationTest {
 
     private final ItemService itemService;
 
-    private final User user = new User(0L, "user", "user@email.com");
+    private final User user = new User(0L, "userrr", "userrr@email.com");
     private final Item item =
             new Item(0L, user, "refrigerator", "simple refro machine", true, null);
     private final Comment comment = new Comment(0L, "comment txt", item, user, LocalDateTime.now());
@@ -58,7 +58,7 @@ public class ItemServiceIntegrationTest {
         assertThat(dtoList.get(0).getLastBooking())
                 .hasFieldOrPropertyWithValue("bookerId", user.getId());
 
-        assertThat(dtoList.get(0).getLastBooking())
+        assertThat(dtoList.get(0).getNextBooking())
                 .hasFieldOrPropertyWithValue("bookerId", user.getId());
 
         assertThat(dtoList.get(0).getComments().get(0))
@@ -85,8 +85,6 @@ public class ItemServiceIntegrationTest {
         assertThat(dtoList.get(0).getLastBooking())
                 .hasFieldOrPropertyWithValue("bookerId", user.getId());
 
-        assertThat(dtoList.get(0).getLastBooking())
-                .hasFieldOrPropertyWithValue("bookerId", user.getId());
 
         assertThat(dtoList.get(0).getComments().get(0))
                 .hasFieldOrPropertyWithValue("text", comment.getText());

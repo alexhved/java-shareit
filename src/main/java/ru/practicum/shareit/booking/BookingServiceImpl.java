@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
 
     private final UserRepository userRepository;
@@ -30,17 +31,6 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final BookingValidator validator;
     private final BookingMapper bookingMapper;
-
-    @Autowired
-    public BookingServiceImpl(UserRepository userRepository, ItemRepository itemRepository,
-                              BookingRepository bookingRepository, BookingValidator validator,
-                              BookingMapper bookingMapper) {
-        this.userRepository = userRepository;
-        this.itemRepository = itemRepository;
-        this.bookingRepository = bookingRepository;
-        this.validator = validator;
-        this.bookingMapper = bookingMapper;
-    }
 
     @Override
     public BookingResponseDto create(Long userId, BookingRequestDto bookingRequestDto) {

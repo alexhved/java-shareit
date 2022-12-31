@@ -9,9 +9,7 @@ import ru.practicum.shareit.item.dto.ItemResponseDto;
 
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
+
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor

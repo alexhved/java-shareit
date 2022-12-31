@@ -1,25 +1,20 @@
 package ru.practicum.shareit.request;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.request.dto.ResponseDto;
 
 import java.util.List;
 
-/**
- * TODO Sprint add-item-requests.
- */
+
 @RestController
 @RequestMapping(path = "/requests")
+@RequiredArgsConstructor
 public class ItemRequestController {
 
     private final RequestValidator requestValidator;
     private final RequestService requestService;
-
-    public ItemRequestController(RequestValidator requestValidator, RequestService requestService) {
-        this.requestValidator = requestValidator;
-        this.requestService = requestService;
-    }
 
     @PostMapping
     public ResponseDto add(@RequestHeader("X-Sharer-User-Id") Long userId,

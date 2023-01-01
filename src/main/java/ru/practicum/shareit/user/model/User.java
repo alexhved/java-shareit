@@ -1,6 +1,8 @@
 package ru.practicum.shareit.user.model;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.practicum.shareit.item.model.Item;
 
 import javax.persistence.*;
@@ -10,6 +12,8 @@ import java.util.Objects;
 @Entity
 @Table(name = "users", schema = "public")
 @NoArgsConstructor
+@Getter
+@Setter
 public class User {
 
     @Id
@@ -43,35 +47,4 @@ public class User {
         return Objects.hash(id);
     }
 
-    public long getId() {
-        return this.id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getEmail() {
-        return this.email;
-    }
-
-    public List<Item> getItems() {
-        return this.items;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setItems(List<Item> items) {
-        this.items = items;
-    }
 }

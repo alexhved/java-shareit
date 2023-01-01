@@ -14,7 +14,7 @@ public class CommentValidator extends AbstractValidator<CommentRequestDto> {
 
     private static final String TEXT = "text";
 
-    protected CommentValidator(Validator validator) {
+    public CommentValidator(Validator validator) {
         super(validator);
     }
 
@@ -29,9 +29,6 @@ public class CommentValidator extends AbstractValidator<CommentRequestDto> {
     @Override
     protected void validateNonNullFields(CommentRequestDto commentRequestDto) {
         List<String> errors = new ArrayList<>(getErrorsByField(commentRequestDto, TEXT));
-        if (commentRequestDto.getText() != null) {
-            errors.addAll(getErrorsByField(commentRequestDto, TEXT));
-        }
         if (!errors.isEmpty()) {
             throw new ValidateException(errors);
         }

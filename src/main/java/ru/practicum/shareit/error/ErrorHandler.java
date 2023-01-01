@@ -3,13 +3,11 @@ package ru.practicum.shareit.error;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.ResourceAccessException;
 
-import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,31 +47,14 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<ErrorResponse> constraintViolationHandler(final ConstraintViolationException e) {
-        return e.getConstraintViolations().stream()
-                .map(violation -> violation.getPropertyPath().toString())
-                .map(message -> {
-                    log.warn(message);
-                    return new ErrorResponse(message);
-                })
-                .collect(Collectors.toUnmodifiableList());
-    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse cataIntegrityExceptionHandler(final DataIntegrityViolationException e) {
+    public ErrorResponse dataIntegrityExceptionHandler(final DataIntegrityViolationException e) {
         log.warn(e.getMessage());
         return new ErrorResponse("Insert data error");
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse requestHeaderExceptionHandler(final MissingRequestHeaderException e) {
-        log.warn(e.getMessage());
-        return new ErrorResponse(e.getMessage());
-    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)

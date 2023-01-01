@@ -7,21 +7,24 @@ import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
 public class ItemMapper {
 
-    public Item mapToItem(ItemRequestDto dto, User user) {
+    public Item mapToItem(ItemRequestDto dto, User user, Optional<ItemRequest> itemRequest) {
         return Item.builder()
                 .id(dto.getId())
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .available(dto.getAvailable())
                 .owner(user)
+                .request(itemRequest.orElse(null))
                 .build();
     }
 
@@ -36,6 +39,16 @@ public class ItemMapper {
     }
 
     public ItemResponseDto mapToItemResponseDto(Item item) {
+        ItemRequest request = item.getRequest();
+        if (request != null) {
+            return ItemResponseDto.builder()
+                    .id(item.getId())
+                    .name(item.getName())
+                    .description(item.getDescription())
+                    .available(item.getAvailable())
+                    .requestId(request.getId())
+                    .build();
+        }
         return ItemResponseDto.builder()
                 .id(item.getId())
                 .name(item.getName())

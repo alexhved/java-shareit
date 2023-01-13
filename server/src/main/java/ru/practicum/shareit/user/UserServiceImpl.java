@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final UserValidator userValidator;
     private final UserMapper userMapper;
 
     @Override
@@ -36,8 +35,6 @@ public class UserServiceImpl implements UserService {
     public UserDto updateById(long userId, UserDto userDto) {
         User userFromDB = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("user with id: %s not found", userId)));
-
-        userValidator.validateNonNullFields(userDto);
 
         User user = userMapper.mapToUser(userDto, userFromDB);
         User updatedUser = userRepository.save(user);

@@ -8,10 +8,14 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.error.ValidateException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 @Controller
 @RequestMapping(path = "/bookings")
@@ -34,7 +38,12 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<Object> bookItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                                           @RequestBody @Valid BookItemRequestDto requestDto) {
+                                           @Valid @RequestBody BookItemRequestDto requestDto) {
+
+        List<String> errors = checkEndTime(requestDto);
+        if (!errors.isEmpty()) {
+            throw new ValidateException(errors);
+        }
         log.info("Creating booking {}, userId={}", requestDto, userId);
         return bookingClient.bookItem(userId, requestDto);
     }
@@ -63,5 +72,16 @@ public class BookingController {
                 .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
 
         return bookingClient.findAllByOwnerIdAndState(userId, state, from, size);
+    }
+
+    private List<String> checkEndTime(BookItemRequestDto bookingRequestDto) {
+        LocalDateTime start = bookingRequestDto.getStart();
+        LocalDateTime end = bookingRequestDto.getEnd();
+
+        if (end.isBefore(start)) {
+            return List.of("end time cannot be early start time");
+        } else {
+            return Collections.emptyList();
+        }
     }
 }

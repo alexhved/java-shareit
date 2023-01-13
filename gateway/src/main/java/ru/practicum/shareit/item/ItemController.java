@@ -19,6 +19,7 @@ import javax.validation.constraints.PositiveOrZero;
 @Validated
 public class ItemController {
     private final ItemClient itemClient;
+    private final ItemValidator itemValidator;
 
     @PostMapping
     public ResponseEntity<Object> save(@Min(1) @RequestHeader("X-Sharer-User-Id") long userId,
@@ -30,6 +31,8 @@ public class ItemController {
     public ResponseEntity<Object> update(@Min(1) @RequestHeader("X-Sharer-User-Id") long userId,
                                          @Min(1) @PathVariable long itemId,
                                          @RequestBody ItemRequestDto itemRequestDto) {
+
+        itemValidator.validateNonNullFields(itemRequestDto);
         return itemClient.update(userId, itemId, itemRequestDto);
     }
 

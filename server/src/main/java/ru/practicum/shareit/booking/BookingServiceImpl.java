@@ -16,7 +16,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -29,13 +28,10 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
-    private final BookingValidator validator;
     private final BookingMapper bookingMapper;
 
     @Override
     public BookingResponseDto create(Long userId, BookingRequestDto bookingRequestDto) {
-        validator.validateNonNullFields(bookingRequestDto);
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("User with id %s not found", userId)));
 
@@ -102,15 +98,7 @@ public class BookingServiceImpl implements BookingService {
             throw new ResourceNotFoundException(String.format("User with id %s not found", userId));
         }
 
-        Pageable pageable;
-        if (from == null || size == null) {
-            pageable = Pageable.unpaged();
-        } else {
-            if (from < 0 || size < 1) {
-                throw new IllegalArgumentException("Illegal pageable argument");
-            }
-            pageable = PageRequest.of((from / size), size);
-        }
+        Pageable pageable = PageRequest.of((from / size), size);
 
         Page<Booking> bookingPage = getPageableBookingsByBookerAndState(userId, state, pageable);
         List<Booking> bookings = bookingPage.getContent();
@@ -133,15 +121,7 @@ public class BookingServiceImpl implements BookingService {
                 .map(Item::getId)
                 .collect(Collectors.toList());
 
-        Pageable pageable;
-        if (from == null || size == null) {
-            pageable = Pageable.unpaged();
-        } else {
-            if (from < 0 || size < 1) {
-                throw new IllegalArgumentException("Illegal pageable argument");
-            }
-            pageable = PageRequest.of((from / size), size);
-        }
+        Pageable pageable = PageRequest.of((from / size), size);
 
         Page<Booking> bookingsByState = getBookingsByOwnerAndState(state, itemsIds, pageable);
 
@@ -151,12 +131,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private Page<Booking> getPageableBookingsByBookerAndState(Long userId, String state, Pageable page) {
-
-        State enumState = Arrays.stream(State.values())
-                .filter(value -> value.name().equals(state))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown state: %s", state)));
-
+        State enumState = State.valueOf(state);
         Page<Booking> bookingsByState;
 
         switch (enumState) {
@@ -186,12 +161,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private Page<Booking> getBookingsByOwnerAndState(String state, List<Long> itemsIds, Pageable page) {
-
-        State enumState = Arrays.stream(State.values())
-                .filter(value -> value.name().equals(state))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown state: %s", state)));
-
+        State enumState = State.valueOf(state);
         Page<Booking> bookingsByState;
 
         switch (enumState) {

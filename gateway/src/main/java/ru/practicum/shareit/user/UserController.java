@@ -17,6 +17,7 @@ import javax.validation.constraints.Min;
 @Slf4j
 public class UserController {
     private final UserClient userClient;
+    private final UserValidator userValidator;
 
     @GetMapping
     public ResponseEntity<Object> findAll() {
@@ -36,6 +37,8 @@ public class UserController {
     @PatchMapping("/{userId}")
     public ResponseEntity<Object> update(@Min(1) @PathVariable long userId,
                                          @RequestBody UserDto userDto) {
+
+        userValidator.validateNonNullFields(userDto);
         return userClient.updateById(userId, userDto);
     }
 

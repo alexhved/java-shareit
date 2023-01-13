@@ -33,7 +33,6 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
     private final RequestRepository requestRepository;
-    private final ItemValidator itemValidator;
     private final ItemMapper itemMapper;
     private final CommentMapper commentMapper;
 
@@ -44,10 +43,10 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid User id"));
 
         Long requestId = itemRequestDto.getRequestId();
-        Optional<ItemRequest> itemRequest = Optional.empty();
+        ItemRequest itemRequest = null;
 
         if (requestId != null) {
-            itemRequest = requestRepository.findById(requestId);
+            itemRequest = requestRepository.findById(requestId).orElse(null);
         }
 
         Item newItem = itemMapper.mapToItem(itemRequestDto, user, itemRequest);
@@ -63,9 +62,6 @@ public class ItemServiceImpl implements ItemService {
 
         Item itemById = itemRepository.findByIdAndOwnerId(itemId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Item with id %s not found", itemId)));
-
-        itemValidator.validateNonNullFields(itemRequestDto);
-
 
         Item item = itemMapper.mapToItem(itemRequestDto, itemById, user);
         Item updatedItem = itemRepository.save(item);
@@ -112,15 +108,7 @@ public class ItemServiceImpl implements ItemService {
             throw new ResourceNotFoundException(String.format("User with id %s not found", userId));
         }
 
-        Pageable pageable;
-        if (from == null || size == null) {
-            pageable = Pageable.unpaged();
-        } else {
-            if (from < 0 || size < 1) {
-                throw new IllegalArgumentException("Illegal pageable argument");
-            }
-            pageable = PageRequest.of(from, size);
-        }
+        Pageable pageable = PageRequest.of(from, size);
 
         Page<Item> itemsPage = itemRepository.findAllByOwnerIdOrderByIdAsc(userId, pageable);
         List<Item> items = itemsPage.getContent();
@@ -159,15 +147,7 @@ public class ItemServiceImpl implements ItemService {
         textSeq = text.toLowerCase().subSequence(0, text.length() - garbageLetters);
         String searchValue = String.valueOf(textSeq);
 
-        Pageable pageable;
-        if (from == null || size == null) {
-            pageable = Pageable.unpaged();
-        } else {
-            if (from < 0 || size < 1) {
-                throw new IllegalArgumentException("Illegal pageable argument");
-            }
-            pageable = PageRequest.of(from, size);
-        }
+        Pageable pageable = PageRequest.of(from, size);
 
         Page<Item> page = itemRepository
                 .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(searchValue, searchValue, pageable);

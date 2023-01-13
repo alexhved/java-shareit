@@ -11,20 +11,19 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
 public class ItemMapper {
 
-    public Item mapToItem(ItemRequestDto dto, User user, Optional<ItemRequest> itemRequest) {
+    public Item mapToItem(ItemRequestDto dto, User user, ItemRequest itemRequest) {
         return Item.builder()
                 .id(dto.getId())
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .available(dto.getAvailable())
                 .owner(user)
-                .request(itemRequest.orElse(null))
+                .request(itemRequest)
                 .build();
     }
 

@@ -52,6 +52,17 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public List<ErrorResponse> validateListHandle(final ValidateException e) {
+        List<String> errorMessages = e.getErrorMessages();
+        errorMessages.forEach(log::warn);
+
+        return errorMessages.stream()
+                .map(ErrorResponse::new)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
         log.warn(e.getMessage());

@@ -1,3 +1,4 @@
-# java-shareit
+###  App for sharing things.
 
-Template repository for Shareit project.
+Multi-module project created with SpringBoot, Hibernate, Docker.  
+Gateway server is responsible for validating input requests and main server is responsible for the business logic.

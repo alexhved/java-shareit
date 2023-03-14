@@ -27,10 +27,11 @@ services:
     depends_on:
       - db
     environment:
+      - SERVER_PORT=9090
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
 
   db:
-    image: postgres:13.7-alpine
+    image: postgres:14-alpine
     container_name: shareit_database
     volumes:
       - /etc/timezone:/etc/timezone:ro
